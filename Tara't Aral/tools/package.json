@@ -1,0 +1,7 @@
+{
+  "name": "studybuddy-tools",
+  "private": true,
+  "description": "Only needed if you change the HTML/JS classes. Rebuilds css/tailwind.css.",
+  "scripts": { "build:css": "tailwindcss -c tailwind.config.js -i input.css -o ../css/tailwind.css --minify" },
+  "devDependencies": { "tailwindcss": "3.4.17" }
+}

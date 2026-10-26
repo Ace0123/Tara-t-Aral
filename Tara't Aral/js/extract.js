@@ -4,16 +4,16 @@ async function extract(file,say){
  if(file.size>25*1024*1024)throw new Error('File is over 25 MB. Split it into smaller files.');
  if(ext==='txt')return{text:await file.text()};
  if(ext==='pdf'){
-  if(!window.pdfjsLib)throw new Error('PDF.js failed to load (check internet connection).');
-  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if(!window.pdfjsLib)throw new Error('The PDF library failed to load. Reload the page.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='vendor/pdf.worker.min.js'; // bundled copy, works offline
   const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;let t='';
   for(let i=1;i<=pdf.numPages;i++){say(`Reading PDF page ${i}/${pdf.numPages}…`);
    const c=await(await pdf.getPage(i)).getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n\n'}
   return{text:t};}
  if(['jpg','jpeg','png','webp'].includes(ext)){
-  if(!window.Tesseract)throw new Error('Tesseract.js failed to load (check internet connection).');
-  say('Running OCR (first run downloads language data)…');
-  const r=await Tesseract.recognize(file,'eng',{logger:m=>m.status==='recognizing text'&&say('OCR '+Math.round(m.progress*100)+'%')});
+  if(!window.Tesseract)throw new Error('The OCR library failed to load. Reload the page.');
+  say('Running OCR…');
+  const r=await Tesseract.recognize(file,'eng',{workerPath:'vendor/tesseract/worker.min.js',corePath:'vendor/tesseract/',langPath:'vendor/tesseract/lang/',logger:m=>m.status==='recognizing text'&&say('OCR '+Math.round(m.progress*100)+'%')});
   return{text:r.data.text,ocr:true};}
  if(ext==='docx'){
   const r=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return{text:r.value};}

@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tara't Aral</title>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<title>StudyBuddy</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyBuddy">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/tesseract.min.js"></script>
+<script src="vendor/mammoth.browser.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<link rel="stylesheet" href="css/tailwind.css">
 <script src="js/theme.js"></script>
 <link rel="stylesheet" href="css/style.css"></head>
 <body>
 <div class="md:flex min-h-screen">
  <aside class="md:w-56 bg-white border-b md:border-r border-slate-200 p-3 md:p-4 md:min-h-screen">
-  <div class="flex items-center justify-between mb-2 md:mb-6"><div class="font-bold text-indigo-600 text-lg">📘 Tara't Aral</div><button id="themeBtn" onclick="toggleTheme()" class="border rounded-lg px-2 py-1 text-sm bg-white" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button></div>
+  <div class="flex items-center justify-between mb-2 md:mb-6"><div class="font-bold text-indigo-600 text-lg">📘 StudyBuddy</div><button id="themeBtn" onclick="toggleTheme()" class="border rounded-lg px-2 py-1 text-sm bg-white" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button></div>
   <nav id="nav" class="flex md:flex-col gap-1 overflow-x-auto text-sm"></nav>
+  <button id="installBtn" onclick="installApp()" class="hidden mt-4 w-full border border-indigo-300 text-indigo-700 rounded-lg px-3 py-2 text-sm bg-white">⬇ Install app</button>
+  <p id="netBadge" class="hidden mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">Offline: everything still works</p>
 </aside>
  <main class="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full"><div id="app"></div></main>
 </div>
@@ -33,4 +41,5 @@
 <script src="js/notes.js"></script>
 <script src="js/views.js"></script>
 <script src="js/main.js"></script>
+<script src="js/pwa.js"></script>
 </body></html>

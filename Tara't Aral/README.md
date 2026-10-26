@@ -1,30 +1,25 @@
 # StudyBuddy
 
-Upload a study file (PDF, DOCX, PPTX, TXT, JPG, PNG, WEBP) and get quiz questions, flashcards and notes. Everything runs in your browser; no server, no AI API.
+Upload a study file (PDF, DOCX, PPTX, TXT, JPG, PNG, WEBP) and get quiz questions, flashcards and notes. Everything runs in your browser: no server, no AI API. Works offline and can be installed as an app.
 
 ## Run it
-1. Unzip the folder (keep the structure below).
-2. Double-click `index.html`. An internet connection is needed to load the libraries (Tailwind, PDF.js, Tesseract.js, Mammoth, JSZip).
-3. Optional: serve it with `python3 -m http.server` and open http://localhost:8000
+- **Easiest (works offline when hosted):** deploy this folder to Vercel/Netlify/GitHub Pages (needs https). Open the site once online, then use the browser's Install button.
+- **On your computer:** open a terminal in this folder and run `python3 -m http.server 8000`, then open http://localhost:8000 (offline mode and installing also work on localhost).
+- Double-clicking `index.html` works for everything except installing and offline caching, and image reading (OCR) may not run from a file.
 
-## Deploy
-Upload the whole folder to any static host (Vercel, Netlify, GitHub Pages). `index.html` must be at the root.
+## Offline / install
+- `sw.js` (service worker) saves the app and all libraries on the first visit.
+- `manifest.webmanifest` + `icons/` make it installable.
+- When you change any file listed in `CORE` in `sw.js`, or add new files, change `VERSION` at the top of `sw.js`.
+
+## Changing the design
+Styles come from `css/tailwind.css`, which is pre-built. If you add new Tailwind classes, rebuild it:
+`cd tools && npm install && npm run build:css`
 
 ## Files
-- index.html        page layout + script tags (loaded in this order)
-- css/style.css     flashcard flip + print styles
-- js/theme.js       dark mode toggle (remembers your choice)
-- js/helpers.js     small utilities (escape, shuffle, toast, download)
-- js/db.js          IndexedDB storage
-- js/extract.js     text extraction (PDF, OCR, DOCX, PPTX, TXT)
-- js/generate.js    question / flashcard / notes generation (no AI)
-- js/state.js       app state, upload flow, delete/clear actions
-- js/quiz.js        quiz logic and screens
-- js/flashcards.js  flashcard logic and screens
-- js/manual.js      create a quiz without a file
-- js/share.js       share quizzes by link or file, import shared quizzes
-- js/typing.js      typing quiz (type the answer from memory)
-- js/edit.js        edit questions, answers and flashcards
-- js/notes.js       notes view and exports (TXT, JSON, CSV, print)
-- js/views.js       pages and sidebar rendering
-- js/main.js        startup
+- index.html, manifest.webmanifest, sw.js
+- css/tailwind.css (built), css/style.css (flashcards, dark mode)
+- icons/ app icons
+- vendor/ bundled libraries: PDF.js, Tesseract.js (+ English data), Mammoth, JSZip
+- tools/ optional: rebuilds tailwind.css
+- js/theme.js dark mode · helpers.js utilities · db.js IndexedDB · extract.js file reading · generate.js questions/flashcards/notes · state.js state, upload, delete · quiz.js · flashcards.js · edit.js · notes.js · typing.js · manual.js · share.js · views.js · main.js · pwa.js
