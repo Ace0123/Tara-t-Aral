@@ -30,19 +30,41 @@ function parseMCQ(lines){
   for(let x=ki;x<lines.length;x++)used.add(x)}
  return{items,used}}
 const cardsFromImported=items=>items.filter(x=>x.a!==null).map(x=>({q:x.q,a:x.opts[x.a],unc:false}));
+// ---- Ignore text that is not study content: "How to use", contents lists, study tips, directions ----
+const SKIP_HEAD=/^(?:how to use(?: this)?(?: reviewer| guide| module)?|contents|table of contents|preface|foreword|about this (?:reviewer|guide|module)|instructions?|directions?|study tips?|acknowledg(?:e)?ments?|references|bibliography)\s*:?$/i;
+const SECTION_LINE=/^(?:part|chapter|unit|module|lesson|section)\s+[ivxlc\d]+\b/i;
+const DIRECTIVE=/^(?:\d+[.)]\s*)?(?:(?:study tip|tip|note|reminder|instructions?|directions?)\s*:|(?:read|memorize|answer|explain|study|review|practice|remember|confirm|choose|select|circle|shade|write|do not|don't)\b)/i;
+const isCapsHead=x=>x.length<60&&/[A-Z]{3}/.test(x)&&x===x.toUpperCase();
+function stripFrontMatter(lines){
+ const out=[];let removed=0;
+ for(let i=0;i<lines.length;i++){
+  const l=lines[i];
+  if(l.length<60&&SKIP_HEAD.test(l)){ // a heading like "HOW TO USE THIS REVIEWER" or "CONTENTS": skip it and what is under it
+   let j=i+1;
+   if(lines[j]&&SECTION_LINE.test(lines[j])&&!isCapsHead(lines[j])){while(j<lines.length&&SECTION_LINE.test(lines[j])&&!isCapsHead(lines[j]))j++} // contents list
+   else{let n=0;while(j<lines.length&&n<15&&!isCapsHead(lines[j])&&!SECTION_LINE.test(lines[j])){j++;n++}} // instructions block: ends at the next ALL-CAPS heading
+   removed+=j-i;i=j-1;continue}
+  if(DIRECTIVE.test(l)&&!/\?$/.test(l)){removed++;continue} // "Study tip: …", "Read the…", "Memorize…"
+  out.push(l)}
+ return{lines:out,removed}}
 function clean(t){return t.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()}
 
 function generate(text,cfg,ocr){
  const orig=text;
  const all=text.split('\n').map(s=>s.trim()).filter(Boolean);
  const imp=parseMCQ(all);
- text=all.filter((_,i)=>!imp.used.has(i)).join('\n'); // remaining text feeds the normal generators
+ let rest=all.filter((_,i)=>!imp.used.has(i)),frontRemoved=0;
+ if(cfg.skipFront!==false){const f=stripFrontMatter(rest);rest=f.lines;frontRemoved=f.removed}
+ text=rest.join('\n'); // remaining text feeds the normal generators
  const lines=text.split('\n').map(s=>s.trim()).filter(Boolean);
- const rawS=text.replace(/\n/g,' ').split(/(?<=[.!?])\s+(?=[A-Z0-9])/).map(s=>s.trim());
+ // Headings (short lines with no end punctuation) get a full stop so they don't merge into the next sentence
+ const headLike=l=>l.split(' ').length<=8&&!/[.!?:;,]$/.test(l)&&/^[A-Z0-9]/.test(l);
+ const headSet=new Set(lines.filter(headLike));
+ const rawS=lines.map(l=>headLike(l)?l+'.':l).join(' ').split(/(?<=[.!?])\s+(?=[A-Z0-9])/).map(s=>s.trim());
  const skipOn=cfg.skipChoice!==false; // user setting: skip multiple-choice-looking passages?
  const isCh=s=>skipOn&&isChoice(s);
  const skipped=rawS.filter(isCh).length; // existing choice lists: skipped, answer key unknown
- const sents=rawS.filter(s=>s.length>25&&s.length<320&&!isCh(s));
+ const sents=rawS.filter(s=>s.length>25&&s.length<320&&!isCh(s)&&!headSet.has(s.replace(/\.$/,'')));
  // Topics: short heading-like lines
  const topics=[...new Set(lines.filter(l=>l.length<70&&l.split(' ').length<=8&&!/[.?!,;]$/.test(l)&&/^(\d+[.)]\s*)?[A-Z0-9]/.test(l)&&!DEF_COLON.test(l)))].slice(0,25);
  // Definitions
@@ -86,6 +108,7 @@ function generate(text,cfg,ocr){
 
  const warnings=[];
  if(imp.items.length){const n=imp.items.filter(x=>x.a!==null).length;warnings.push(`Imported ${imp.items.length} multiple-choice questions from your file; ${n} have a known answer.`+(n<imp.items.length?' Paste an answer key in the Quiz tab to score them.':''))}
+ if(frontRemoved)warnings.push(`Ignored ${frontRemoved} line(s) that look like instructions, contents lists or study tips (not study content). You can turn this off in Settings.`);
  if(skipped)warnings.push(`${skipped} passage(s) that look like existing multiple-choice items were skipped, because this app cannot tell which choice is correct.`);
  if(ocr)warnings.push('Text came from OCR and may contain errors. Check items before relying on them.');
  if(!imp.items.length&&questions.length<cfg.count)warnings.push(`Only ${questions.length} of ${cfg.count} requested questions could be built from this content (needs definitions or repeated key terms).`);

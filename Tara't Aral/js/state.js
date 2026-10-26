@@ -1,10 +1,10 @@
 /* ================= 5. STATE ================= */
-let cfg={mode:'all',diff:'medium',count:10,skipChoice:true};
+let cfg={mode:'all',diff:'medium',count:10,skipChoice:true,skipFront:true};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('sb_cfg')||'{}'))}catch(e){}
 let S={edit:false,view:'dashboard',rid:null,tab:'notes',reviewers:[],history:[],busy:'',q:null,fc:null,search:''};
 const cur=()=>S.reviewers.find(r=>r.id===S.rid);
 const go=(v,rid,tab)=>{S.edit=false;S.view=v;if(rid)S.rid=rid;if(tab)S.tab=tab;render()};
-function toggleSkip(){saveCfg('skipChoice',cfg.skipChoice===false);render()}
+function toggleCfg(k){saveCfg(k,cfg[k]===false);render()} // flips an ON/OFF setting
 function saveCfg(k,v){cfg[k]=k==='count'?Math.max(1,Math.min(50,+v||10)):v;try{localStorage.setItem('sb_cfg',JSON.stringify(cfg))}catch(e){}}
 
 /* ================= 6. UPLOAD FLOW ================= */
