@@ -22,4 +22,4 @@ Styles come from `css/tailwind.css`, which is pre-built. If you add new Tailwind
 - icons/ app icons
 - vendor/ bundled libraries: PDF.js, Tesseract.js (+ English data), Mammoth, JSZip
 - tools/ optional: rebuilds tailwind.css
-- js/theme.js dark mode · helpers.js utilities · db.js IndexedDB · extract.js file reading · generate.js questions/flashcards/notes · state.js state, upload, delete · quiz.js · flashcards.js · edit.js · notes.js · typing.js · manual.js · share.js · views.js · main.js · pwa.js
+- js/theme.js dark mode · helpers.js utilities · db.js IndexedDB · extract.js file reading · generate.js questions/flashcards/notes · state.js state, upload, delete · quiz.js · flashcards.js · edit.js · notes.js · typing.js · manual.js · share.js · review.js (choose sections) · backup.js (backup/restore) · views.js · main.js · pwa.js

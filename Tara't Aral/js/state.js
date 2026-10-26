@@ -3,7 +3,8 @@ let cfg={mode:'all',diff:'medium',count:10,skipChoice:true,skipFront:true};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('sb_cfg')||'{}'))}catch(e){}
 let S={edit:false,view:'dashboard',rid:null,tab:'notes',reviewers:[],history:[],busy:'',q:null,fc:null,search:''};
 const cur=()=>S.reviewers.find(r=>r.id===S.rid);
-const go=(v,rid,tab)=>{S.edit=false;S.view=v;if(rid)S.rid=rid;if(tab)S.tab=tab;render()};
+const go=(v,rid,tab)=>{if(S.review&&v!=='review'){const rv=S.review;S.review=null;rv.res(null)} // leaving the review screen = cancel
+ S.edit=false;S.view=v;if(rid)S.rid=rid;if(tab)S.tab=tab;render()};
 function toggleCfg(k){saveCfg(k,cfg[k]===false);render()} // flips an ON/OFF setting
 function saveCfg(k,v){cfg[k]=k==='count'?Math.max(1,Math.min(50,+v||10)):v;try{localStorage.setItem('sb_cfg',JSON.stringify(cfg))}catch(e){}}
 
@@ -13,9 +14,15 @@ async function handleFiles(files){
   try{
    S.busy='Reading '+f.name+'…';render();
    const{text,ocr}=await extract(f,m=>{const e=document.getElementById('busy');if(e)e.textContent=m});
-   const t=clean(text||'');
+   let t=clean(text||'');
    if(t.length<40)throw new Error(/\.pdf$/i.test(f.name)?'No selectable text found (likely a scanned PDF). Save pages as images and upload those for OCR.':'No usable text found in this file.');
-   const g=generate(t,cfg,ocr);
+   let note=null;
+   if(cfg.review!==false){ // let the user choose which sections to use
+    const ans=await askSections(f.name,t);
+    if(!ans){toast('Skipped '+f.name);continue}
+    t=ans.text;if(ans.used<ans.total)note=`You used ${ans.used} of ${ans.total} sections from this file.`;
+    if(t.length<40)throw new Error('The selected sections have too little text.')}
+   const g=generate(t,cfg,ocr);if(note)g.warnings.unshift(note);
    const r={id:uid(),name:f.name,date:Date.now(),chars:t.length,ocr:!!ocr,cfg:{...cfg},...g};
    await DB.put('reviewers',r);S.reviewers.unshift(r);S.rid=r.id;
    S.tab=cfg.mode==='quiz'?'quiz':cfg.mode==='flashcards'?'cards':'notes';S.q=null;S.fc=null;S.view='reviewer';

@@ -1,8 +1,8 @@
 /* StudyBuddy service worker: lets the app load and work with no internet.
    Change VERSION whenever you add or rename files in CORE, so phones fetch a fresh copy. */
-const VERSION='v1',CACHE='studybuddy-'+VERSION;
+const VERSION='v2',CACHE='studybuddy-'+VERSION;
 const CORE=['./','index.html','manifest.webmanifest','css/tailwind.css','css/style.css',
- 'js/theme.js','js/helpers.js','js/db.js','js/extract.js','js/generate.js','js/state.js','js/quiz.js','js/flashcards.js','js/edit.js','js/notes.js','js/typing.js','js/manual.js','js/share.js','js/views.js','js/main.js','js/pwa.js',
+ 'js/theme.js','js/helpers.js','js/db.js','js/extract.js','js/generate.js','js/state.js','js/quiz.js','js/flashcards.js','js/edit.js','js/notes.js','js/typing.js','js/manual.js','js/share.js','js/review.js','js/backup.js','js/views.js','js/main.js','js/pwa.js',
  'icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png',
  'vendor/pdf.min.js','vendor/pdf.worker.min.js','vendor/mammoth.browser.min.js','vendor/jszip.min.js','vendor/tesseract.min.js'];
 // Image-reading (OCR) files are large, so a failure here must not block installing the app.
