@@ -1,0 +1,4 @@
+body{background:#f8fafc;color:#1e293b}
+ .card3d{perspective:900px}.flip{transition:transform .35s;transform-style:preserve-3d;position:relative}
+ .flip.on{transform:rotateY(180deg)}.face{backface-visibility:hidden;position:absolute;inset:0}.back{transform:rotateY(180deg)}
+ @media print{aside,.noprint{display:none!important}main{padding:0!important}}
