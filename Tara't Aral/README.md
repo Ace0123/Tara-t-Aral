@@ -21,6 +21,7 @@ Upload the whole folder to any static host (Vercel, Netlify, GitHub Pages). `ind
 - js/quiz.js        quiz logic and screens
 - js/flashcards.js  flashcard logic and screens
 - js/manual.js      create a quiz without a file
+- js/share.js       share quizzes by link or file, import shared quizzes
 - js/typing.js      typing quiz (type the answer from memory)
 - js/edit.js        edit questions, answers and flashcards
 - js/notes.js       notes view and exports (TXT, JSON, CSV, print)
