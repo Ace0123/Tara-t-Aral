@@ -1,4 +1,3 @@
-/* ================= 1. HELPERS ================= */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -6,7 +5,6 @@ const trunc=(s,n)=>s.length>n?s.slice(0,n-1).replace(/\s+\S*$/,'')+'…':s;
 function toast(m,bad){const t=document.getElementById('toast');t.textContent=m;t.style.background=bad?'#b91c1c':'#1e293b';t.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add('hidden'),4500)}
 function download(name,type,content){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 
-/* ================= 2. INDEXEDDB ================= */
 const DB={db:null,
  open(){return new Promise((ok,no)=>{const r=indexedDB.open('studybuddy',1);
   r.onupgradeneeded=()=>['reviewers','history'].forEach(s=>r.result.createObjectStore(s,{keyPath:'id'}));
@@ -15,7 +13,6 @@ const DB={db:null,
  all(s){return this.run(s,'readonly',o=>o.getAll())},put(s,v){return this.run(s,'readwrite',o=>o.put(v))},
  del(s,id){return this.run(s,'readwrite',o=>o.delete(id))},clear(s){return this.run(s,'readwrite',o=>o.clear())}};
 
-/* ================= 3. TEXT EXTRACTION (all local) ================= */
 async function extract(file,say){
  const ext=file.name.split('.').pop().toLowerCase();
  if(file.size>25*1024*1024)throw new Error('File is over 25 MB. Split it into smaller files.');
@@ -44,7 +41,6 @@ async function extract(file,say){
  throw new Error('Unsupported file type ".'+ext+'".');
 }
 
-/* ================= 4. STUDY MATERIAL GENERATION (no AI) ================= */
 const STOP=new Set('about above after again against also because been before being between both could during each every from have having here into itself just more most other should since some such than that their them then there these they this those through under until very were what when where which while will with would your'.split(' '));
 const BAD_SUBJ=/^(This|That|It|There|These|Those|He|She|They|What|Which|Who|We|You|I|Here)\b/;
 const DEF_IS=/^(?:The |An? )?([A-Z][A-Za-z0-9\- ]{1,40}?) (?:is|are|refers to|means|is defined as|are defined as|can be defined as|is known as) (?:the |an? )?(.{15,})$/;
@@ -102,7 +98,6 @@ function generate(text,cfg,ocr){
  return{notes:{topics,defs:defs.map(d=>({term:d.term,def:d.def})),terms:keywords.slice(0,15),facts},questions,cards,warnings,preview:text.slice(0,1500)};
 }
 
-/* ================= 5. STATE ================= */
 let cfg={mode:'all',diff:'medium',count:10};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('sb_cfg')||'{}'))}catch(e){}
 let S={view:'dashboard',rid:null,tab:'notes',reviewers:[],history:[],busy:'',q:null,fc:null,search:''};
@@ -110,7 +105,6 @@ const cur=()=>S.reviewers.find(r=>r.id===S.rid);
 const go=(v,rid,tab)=>{S.view=v;if(rid)S.rid=rid;if(tab)S.tab=tab;render()};
 function saveCfg(k,v){cfg[k]=k==='count'?Math.max(1,Math.min(50,+v||10)):v;try{localStorage.setItem('sb_cfg',JSON.stringify(cfg))}catch(e){}}
 
-/* ================= 6. UPLOAD FLOW ================= */
 async function handleFiles(files){
  for(const f of files){
   try{
@@ -128,7 +122,6 @@ async function handleFiles(files){
  S.busy='';render();
 }
 
-/* ================= 7. QUIZ ================= */
 function startQuiz(){const r=cur();if(!r.questions.length)return;S.q={qs:shuffle(r.questions),i:0,sel:null,wrong:[],score:0,done:false};render()}
 function pick(k){const q=S.q;if(q.sel!==null)return;q.sel=k;const x=q.qs[q.i];if(k===x.a)q.score++;else q.wrong.push({...x,chosen:k});render()}
 async function nextQ(){const q=S.q;q.i++;q.sel=null;
@@ -151,7 +144,6 @@ function quizHTML(r){
  ${q.sel!==null?`<p class="text-sm text-slate-600 mt-4 bg-slate-100 rounded-lg p-3 text-left">${esc(x.expl)}</p><button onclick="nextQ()" class="mt-4 bg-indigo-600 text-white px-5 py-2 rounded-lg">${q.i+1>=q.qs.length?'Finish':'Next'}</button>`:''}</div>`}
 const wrongHTML=w=>`<div class="border rounded-lg p-3 mb-2 bg-white text-sm"><p class="font-medium">${esc(w.q)}</p><p class="text-red-600">Your answer: ${esc(w.opts[w.chosen])}</p><p class="text-green-700">Correct: ${esc(w.opts[w.a])}</p><p class="text-slate-500">${esc(w.expl)}</p></div>`;
 
-/* ================= 8. FLASHCARDS ================= */
 function startFC(only){const r=cur();if(!r.cards.length)return;let d=[...r.cards];
  if(only&&S.fc)d=S.fc.deck.filter((_,i)=>S.fc.known[i]!==1);
  S.fc={deck:d,i:0,flip:false,known:{}};render()}
@@ -175,7 +167,6 @@ function cardsHTML(r){
   <button onclick="fcGo(1)" class="border rounded-lg px-3 py-2 bg-white">Next →</button></div>
  <div class="flex justify-center gap-4 mt-3 text-xs text-indigo-600"><button onclick="fcShuffle()">Shuffle</button><button onclick="startFC(true)">Only unknown cards</button></div>`}
 
-/* ================= 9. NOTES + EXPORTS ================= */
 function notesBody(r){const n=r.notes,q=S.search.toLowerCase(),m=s=>!q||s.toLowerCase().includes(q);
  const sec=(t,items)=>items.length?`<h3 class="font-semibold mt-4 mb-1">${t}</h3><ul class="list-disc pl-5 text-sm space-y-1">${items.join('')}</ul>`:'';
  const html=sec('Topics',n.topics.filter(m).map(t=>`<li>${esc(t)}</li>`))+sec('Definitions',n.defs.filter(d=>m(d.term+d.def)).map(d=>`<li><b>${esc(d.term)}</b>: ${esc(d.def)}</li>`))
@@ -193,7 +184,6 @@ const exp={
  fjson:()=>cur().cards.length?download(base()+'-flashcards.json','application/json',JSON.stringify(cur().cards,null,2)):toast('No flashcards to export.',true),
  fcsv:()=>cur().cards.length?download(base()+'-flashcards.csv','text/csv','Question,Answer\n'+cur().cards.map(c=>csv(c.q)+','+csv(c.a)).join('\n')):toast('No flashcards to export.',true)};
 
-/* ================= 10. DELETE / CLEAR ================= */
 async function delReviewer(id){if(!confirm('Delete this reviewer and its quiz history?'))return;
  await DB.del('reviewers',id);for(const h of S.history.filter(h=>h.rid===id))await DB.del('history',h.id);
  S.reviewers=S.reviewers.filter(r=>r.id!==id);S.history=S.history.filter(h=>h.rid!==id);S.rid=null;S.q=S.fc=null;go('reviewers')}
@@ -201,7 +191,6 @@ async function clearHistory(){if(!confirm('Clear all quiz history?'))return;awai
 async function clearAll(){if(!confirm('Delete ALL saved reviewers, flashcards and history?'))return;
  await DB.clear('reviewers');await DB.clear('history');S.reviewers=[];S.history=[];S.rid=S.q=S.fc=null;go('dashboard');toast('All data cleared.')}
 
-/* ================= 11. VIEWS ================= */
 const settingsHTML=()=>{const sel=(k,opts)=>`<select onchange="saveCfg('${k}',this.value)" class="border rounded-lg px-3 py-2 text-sm bg-white w-full">${opts.map(([v,l])=>`<option value="${v}" ${cfg[k]==v?'selected':''}>${l}</option>`).join('')}</select>`;
  return`<div class="grid sm:grid-cols-3 gap-3"><label class="text-xs text-slate-500">Study mode${sel('mode',[['all','Everything'],['quiz','Quiz first'],['flashcards','Flashcards first'],['notes','Notes first']])}</label>
  <label class="text-xs text-slate-500">Difficulty${sel('diff',[['easy','Easy (recognize terms)'],['medium','Medium (mixed)'],['hard','Hard (recall definitions)']])}</label>
@@ -239,6 +228,5 @@ function render(){
  document.getElementById('app').innerHTML=V[S.view]();
 }
 
-/* ================= 12. START ================= */
 (async()=>{try{await DB.open();S.reviewers=(await DB.all('reviewers')).sort((a,b)=>b.date-a.date);S.history=await DB.all('history')}
  catch(e){toast('Local storage (IndexedDB) is unavailable. Nothing will be saved.',true)}render()})();
