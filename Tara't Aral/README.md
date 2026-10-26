@@ -13,6 +13,7 @@ Upload the whole folder to any static host (Vercel, Netlify, GitHub Pages). `ind
 ## Files
 - index.html        page layout + script tags (loaded in this order)
 - css/style.css     flashcard flip + print styles
+- js/theme.js       dark mode toggle (remembers your choice)
 - js/helpers.js     small utilities (escape, shuffle, toast, download)
 - js/db.js          IndexedDB storage
 - js/extract.js     text extraction (PDF, OCR, DOCX, PPTX, TXT)
